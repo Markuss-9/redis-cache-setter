@@ -4,36 +4,73 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Redis Cache Setter</title>
+
+    <!-- "Dancing Script" -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- "Noto Sans" -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
+
     <style>
+      * {
+        font-family: "Noto Sans", sans-serif;
+        font-optical-sizing: auto;
+        font-weight: 400;
+        font-style: normal;
+      }
+
+      html {
+        background: black;
+      }
+
       body {
         font-family: Arial, sans-serif;
-        background-color: #adadad;
+        background-color: #2b2b2b;
         margin: 0;
-        padding: 20px;
         display: flex;
         justify-content: center;
         align-items: center;
         height: 100vh;
         flex-direction: column;
+        gap: 20px;
       }
 
       h1 {
         text-align: center;
-        color: #333;
+        color: #ffffff;
+        font-family: "Dancing Script", cursive;
+        font-optical-sizing: auto;
+        font-weight: bold;
+        font-style: normal;
       }
 
       form {
-        background: #fff;
+        background: #1a1a1a;
         padding: 20px;
         border-radius: 5px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        box-shadow: 0px 0px 10px 2px rgb(37 0 63);
         width: 400px;
+      }
+
+      .form-container {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
       }
 
       label {
         display: block;
-        margin-bottom: 5px;
-        color: #555;
+        color: #afafaf;
       }
 
       input[type="text"],
@@ -41,12 +78,15 @@
       input[type="file"],
       textarea {
         width: 100%;
+        max-width: 100%;
         padding: 10px;
-        margin-bottom: 15px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
+        border: 1px solid #000525;
+        border-radius: 15px;
         box-sizing: border-box;
         transition: border-color 0.3s;
+        background-color: #201c43;
+        color: #ffffff !important;
+        caret-color: #007bff;
       }
 
       input[type="text"]:focus,
@@ -80,61 +120,206 @@
       }
 
       #responseMessage {
-        margin-top: 20px;
         text-align: center;
         color: #ffffff;
         background-color: #4b4b4b;
         padding: 2px 20px;
       }
 
+      #responseMessage:empty {
+        display: none;
+      }
+
       input:disabled,
       textarea:disabled {
-        background-color: rgba(179, 179, 179, 0.3);
+        background-color: rgb(0 0 0 / 30%);
+        color: #3f3f3f;
+      }
+
+      #cacheForm {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      input:-webkit-autofill,
+      textarea:-webkit-autofill,
+      select:-webkit-autofill {
+        background-color: #622f87 !important;
+        color: #ffffff !important;
+        border: 1px solid #000525 !important;
+        -webkit-text-fill-color: #ffffff !important;
+        -webkit-box-shadow: 0 0 0px 1000px #622f87 inset !important;
+      }
+
+      input:-webkit-autofill:focus,
+      textarea:-webkit-autofill:focus,
+      select:-webkit-autofill:focus {
+        background-color: #622f87 !important;
+        color: #ffffff !important;
+        border: 1px solid #007bff !important;
+        -webkit-text-fill-color: #ffffff !important;
+        -webkit-box-shadow: 0 0 0px 1000px #622f87 inset !important;
+      }
+
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .field-persist {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+      }
+    </style>
+
+    <style>
+      .checkbox-wrapper-43 input[type="checkbox"] {
+        display: none;
+        visibility: hidden;
+      }
+
+      .checkbox-wrapper-43 label {
+        display: inline-block;
+      }
+
+      .checkbox-wrapper-43 .check {
+        cursor: pointer;
+        position: relative;
+        margin: auto;
+        width: 18px;
+        height: 18px;
+        -webkit-tap-highlight-color: transparent;
+        transform: translate3d(0, 0, 0);
+      }
+      .checkbox-wrapper-43 .check:before {
+        content: "";
+        position: absolute;
+        top: -15px;
+        left: -15px;
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: rgba(34, 50, 84, 0.03);
+        opacity: 0;
+        transition: opacity 0.2s ease;
+      }
+      .checkbox-wrapper-43 .check svg {
+        position: relative;
+        z-index: 1;
+        fill: none;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke: #c8ccd4;
+        stroke-width: 1.5;
+        transform: translate3d(0, 0, 0);
+        transition: all 0.2s ease;
+      }
+      .checkbox-wrapper-43 .check svg path {
+        stroke-dasharray: 60;
+        stroke-dashoffset: 0;
+      }
+      .checkbox-wrapper-43 .check svg polyline {
+        stroke-dasharray: 22;
+        stroke-dashoffset: 66;
+      }
+      .checkbox-wrapper-43 .check:hover:before {
+        opacity: 1;
+      }
+      .checkbox-wrapper-43 .check:hover svg {
+        stroke: #007bff;
+      }
+      .checkbox-wrapper-43 input[type="checkbox"]:checked + .check svg {
+        stroke: #007bff;
+      }
+      .checkbox-wrapper-43 input[type="checkbox"]:checked + .check svg path {
+        stroke-dashoffset: 60;
+        transition: all 0.3s linear;
+      }
+      .checkbox-wrapper-43
+        input[type="checkbox"]:checked
+        + .check
+        svg
+        polyline {
+        stroke-dashoffset: 42;
+        transition: all 0.2s linear;
+        transition-delay: 0.15s;
       }
     </style>
   </head>
   <body>
-    <h1>Set Cache Key in Redis</h1>
+    <h1>Redis Cache Setter</h1>
 
     <form id="cacheForm">
-      <label for="host">Redis Host:</label>
-      <input
-        type="text"
-        id="host"
-        name="host"
-        placeholder="e.g. 127.0.0.1"
-        required
-      />
+      <div class="form-container">
+        <div class="field">
+          <label for="host">Redis Host</label>
+          <input
+            type="text"
+            id="host"
+            name="host"
+            placeholder="e.g. 127.0.0.1"
+            required
+          />
+        </div>
 
-      <label for="key">Key:</label>
-      <input type="text" id="key" name="key" required />
+        <div class="field">
+          <label for="key">Key</label>
+          <input
+            type="text"
+            id="key"
+            name="key"
+            placeholder="Key name"
+            required
+          />
+        </div>
 
-      <label for="value">Value (optional, will use file if provided):</label>
-      <textarea
-        id="value"
-        name="value"
-        placeholder="Enter value here (optional)"
-        rows="4"
-      ></textarea>
+        <div class="field">
+          <label for="value">Value (optional, will use file if provided)</label>
+          <textarea
+            id="value"
+            name="value"
+            placeholder="Value"
+            rows="4"
+          ></textarea>
+        </div>
 
-      <label for="fileInput">File (will be used as value):</label>
-      <input type="file" id="fileInput" name="file" />
-      <button type="button" id="clearFileButton" style="display: none">
-        Clear File
-      </button>
+        <div class="field">
+          <label for="fileInput">File (will be used as value)</label>
+          <input type="file" id="fileInput" name="file" />
+          <button type="button" id="clearFileButton" style="display: none">
+            Clear File
+          </button>
+        </div>
 
-      <label for="expiration">Expiration (seconds):</label>
-      <input
-        type="number"
-        id="expiration"
-        name="expiration"
-        min="1"
-        value="60"
-      />
+        <div class="field">
+          <label for="expiration">Expiration (seconds)</label>
+          <input
+            type="number"
+            id="expiration"
+            name="expiration"
+            min="1"
+            value="60"
+          />
+        </div>
 
-      <label for="persist">Persist (do not expire):</label>
-      <input type="checkbox" id="persist" name="persist" />
-
+        <div class="field-persist">
+          <div class="checkbox-wrapper-43">
+            <input type="checkbox" id="persist" name="persist" />
+            <label for="persist" class="check">
+              <svg width="23px" height="23px" viewBox="0 0 18 18">
+                <path
+                  d="M1,9 L1,3.5 C1,2 2,1 3.5,1 L14.5,1 C16,1 17,2 17,3.5 L17,14.5 C17,16 16,17 14.5,17 L3.5,17 C2,17 1,16 1,14.5 L1,9 Z"
+                ></path>
+                <polyline points="1 9 7 14 15 4"></polyline>
+              </svg>
+            </label>
+          </div>
+          <label for="persist">Persist (do not expire)</label>
+        </div>
+      </div>
       <button type="submit">Set Cache</button>
     </form>
 
