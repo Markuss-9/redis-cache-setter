@@ -19,6 +19,14 @@ npm i
 
 The command will start the server and open the client webpage
 
+### MacOS and Linux
+
 ```bash
 npm start
+```
+
+### Windows
+
+```bash
+npm run windows
 ```
