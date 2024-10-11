@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Redis Cache Setter</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #adadad;
+        margin: 0;
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        flex-direction: column;
+      }
+
+      h1 {
+        text-align: center;
+        color: #333;
+      }
+
+      form {
+        background: #fff;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        width: 400px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 5px;
+        color: #555;
+      }
+
+      input[type="text"],
+      input[type="number"],
+      input[type="file"],
+      textarea {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+        transition: border-color 0.3s;
+      }
+
+      input[type="text"]:focus,
+      input[type="number"]:focus,
+      textarea:focus {
+        border-color: #007bff;
+        outline: none;
+      }
+
+      button {
+        background-color: #007bff;
+        color: white;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        width: 100%;
+      }
+
+      button:hover {
+        background-color: #0056b3;
+      }
+
+      #clearFileButton {
+        background-color: #dc3545;
+      }
+
+      #clearFileButton:hover {
+        background-color: #c82333;
+      }
+
+      #responseMessage {
+        margin-top: 20px;
+        text-align: center;
+        color: #ffffff;
+        background-color: #4b4b4b;
+        padding: 2px 20px;
+      }
+
+      input:disabled,
+      textarea:disabled {
+        background-color: rgba(179, 179, 179, 0.3);
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Set Cache Key in Redis</h1>
+
+    <form id="cacheForm">
+      <label for="host">Redis Host:</label>
+      <input
+        type="text"
+        id="host"
+        name="host"
+        placeholder="e.g. 127.0.0.1"
+        required
+      />
+
+      <label for="key">Key:</label>
+      <input type="text" id="key" name="key" required />
+
+      <label for="value">Value (optional, will use file if provided):</label>
+      <textarea
+        id="value"
+        name="value"
+        placeholder="Enter value here (optional)"
+        rows="4"
+      ></textarea>
+
+      <label for="fileInput">File (will be used as value):</label>
+      <input type="file" id="fileInput" name="file" />
+      <button type="button" id="clearFileButton" style="display: none">
+        Clear File
+      </button>
+
+      <label for="expiration">Expiration (seconds):</label>
+      <input
+        type="number"
+        id="expiration"
+        name="expiration"
+        min="1"
+        value="60"
+      />
+
+      <label for="persist">Persist (do not expire):</label>
+      <input type="checkbox" id="persist" name="persist" />
+
+      <button type="submit">Set Cache</button>
+    </form>
+
+    <p id="responseMessage"></p>
+
+    <script>
+      const fileInput = document.getElementById("fileInput");
+      const valueInput = document.getElementById("value");
+      const clearFileButton = document.getElementById("clearFileButton");
+
+      fileInput.addEventListener("change", () => {
+        if (fileInput.files.length > 0) {
+          valueInput.disabled = true;
+          clearFileButton.style.display = "inline";
+        } else {
+          valueInput.disabled = false;
+          clearFileButton.style.display = "none";
+        }
+      });
+
+      clearFileButton.addEventListener("click", () => {
+        fileInput.value = "";
+        valueInput.disabled = false;
+        clearFileButton.style.display = "none";
+      });
+
+      document
+        .getElementById("persist")
+        .addEventListener("change", function () {
+          const expirationInput = document.getElementById("expiration");
+          if (this.checked) {
+            expirationInput.disabled = true;
+          } else {
+            expirationInput.disabled = false;
+          }
+        });
+
+      document
+        .getElementById("cacheForm")
+        .addEventListener("submit", async function (event) {
+          event.preventDefault();
+
+          const host = document.getElementById("host").value;
+          const key = document.getElementById("key").value;
+          const value = valueInput.value;
+          const file = fileInput.files[0];
+          const expiration = document.getElementById("expiration").value;
+          const persist = document.getElementById("persist").checked;
+
+          const formData = new FormData();
+          formData.append("host", host);
+          formData.append("key", key);
+
+          if (file) {
+            formData.append("file", file);
+          } else {
+            formData.append("value", value);
+          }
+
+          if (persist) {
+            formData.append("persist", persist);
+          } else {
+            formData.append("expiration", expiration);
+          }
+
+          try {
+            const response = await fetch("http://localhost:9999/set-cache", {
+              method: "POST",
+              body: formData,
+            });
+
+            const data = await response.json();
+            document.getElementById("responseMessage").innerText = data.message;
+          } catch (error) {
+            console.error("Error setting cache:", error);
+            document.getElementById(
+              "responseMessage"
+            ).innerHTML = `Error setting cache (check console for more info) <br/> ${error.message} <bt/> ${error.stack}`;
+          }
+        });
+    </script>
+  </body>
+</html>

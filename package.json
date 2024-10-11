@@ -1,0 +1,21 @@
+{
+  "name": "redis-cache-setter",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "start": "concurrently \"node server.js\" \"open client.html\"",
+    "windows": "concurrently \"node server.js\" \"start client.html\""
+  },
+  "author": "Markuss-9",
+  "license": "ISC",
+  "description": "Tool to set key cache on redis",
+  "dependencies": {
+    "concurrently": "^9.0.1",
+    "cors": "^2.8.5",
+    "express": "^4.21.1",
+    "ioredis": "^5.4.1",
+    "multer": "^1.4.5-lts.1",
+    "open-cli": "^8.0.0"
+  },
+  "type": "module"
+}
