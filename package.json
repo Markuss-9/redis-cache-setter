@@ -7,7 +7,7 @@
     "windows": "concurrently \"node server.js\" \"start client.html\""
   },
   "author": "Markuss-9",
-  "license": "ISC",
+  "license": "GLWTS",
   "description": "Tool to set key cache on redis",
   "dependencies": {
     "concurrently": "^9.0.1",
