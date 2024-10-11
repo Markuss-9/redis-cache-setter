@@ -19,22 +19,33 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 app.post("/set-cache", upload.single("file"), async (req, res) => {
-  const { host, key, expiration, persist } = req.body;
-  let cacheValue;
-
-  if (req.file) {
-    const filePath = path.join(__dirname, req.file.path);
-    cacheValue = fs.readFileSync(filePath, "utf8");
-  } else {
-    cacheValue = req.body.value;
-  }
-
-  const redis = new Redis({
-    host,
-    port: 6379,
-  });
-
+  let redis;
   try {
+    const { host, key, expiration, persist } = req.body;
+    let cacheValue;
+
+    if (req.file) {
+      const filePath = path.join(__dirname, req.file.path);
+      cacheValue = fs.readFileSync(filePath, "utf8");
+    } else {
+      cacheValue = req.body.value;
+    }
+
+    redis = new Redis({
+      host,
+      port: 6379,
+      retryStrategy: () => null,
+    });
+
+    redis.on("error", (err) => {
+      console.error("Redis connection error:", err.message);
+      if (!res.headersSent) {
+        res.status(500).json({
+          message: `Failed to connect to Redis at host '${host}': ${err.message}`,
+        });
+      }
+    });
+
     if (persist === "true") {
       await redis.set(key, cacheValue);
     } else if (expiration) {
@@ -43,15 +54,24 @@ app.post("/set-cache", upload.single("file"), async (req, res) => {
       throw new Error("Required persist or expiration");
     }
 
-    res.json({ message: `Key '${key}' set successfully on host '${host}'.` });
+    if (!res.headersSent) {
+      res.json({ message: `Key '${key}' set successfully on host '${host}'` });
+    }
   } catch (error) {
-    console.error("Error setting cache:", error);
-    res.status(500).json({ message: "Error setting cache." });
+    console.error("Error setting cache:", error.message);
+    if (!res.headersSent) {
+      res
+        .status(500)
+        .json({ message: `Error setting cache: ${error.message}` });
+    }
   } finally {
     if (req.file) {
       fs.unlinkSync(req.file.path);
     }
-    redis.quit();
+
+    if (redis && redis.status !== "end") {
+      redis.quit();
+    }
   }
 });
 
